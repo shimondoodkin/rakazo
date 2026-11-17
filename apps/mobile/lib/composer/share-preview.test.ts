@@ -31,6 +31,19 @@ describe("share preview", () => {
     expect(preview.fileName).toBe("notes.pdf");
     expect(preview.fileCount).toBe(1);
   });
+  it("treats HEIC and HEIF as files, not thumbnails", () => {
+    const preview = sharePreview({
+      ...base,
+      files: [
+        { uri: "content://photos/1", name: "a.heic", mimeType: "image/heic" },
+        { uri: "content://photos/2", name: "b.heif", mimeType: "image/heif" },
+        { uri: "content://photos/3", name: "c.png", mimeType: "image/png" },
+      ],
+    });
+    expect(preview.images.map((file) => file.name)).toEqual(["c.png"]);
+    expect(preview.fileCount).toBe(2);
+    expect(preview.fileName).toBeNull();
+  });
   it("uses a count for multiple other files", () => {
     const preview = sharePreview({
       ...base,

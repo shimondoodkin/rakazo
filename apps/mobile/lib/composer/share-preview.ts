@@ -1,9 +1,12 @@
+import { isAttachmentImageMimeType } from "@rakazo/contracts";
 import type { IncomingShare } from "./incoming-share";
 
 /** Preview source URIs directly: choosing a target must not copy or read entire files. */
 export function sharePreview(share: IncomingShare) {
-  const images = share.files.filter((file) => file.mimeType?.startsWith("image/"));
-  const files = share.files.filter((file) => !file.mimeType?.startsWith("image/"));
+  const isImage = (file: IncomingShare["files"][number]) =>
+    !!file.mimeType && isAttachmentImageMimeType(file.mimeType);
+  const images = share.files.filter(isImage);
+  const files = share.files.filter((file) => !isImage(file));
   return {
     text: share.text,
     images: images.slice(0, 4),

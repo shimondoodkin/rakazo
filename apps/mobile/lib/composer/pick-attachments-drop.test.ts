@@ -118,6 +118,16 @@ describe("dropped file attachments", () => {
     expect(state.deleted).toHaveLength(2);
   });
 
+  it.each(["photo.heic", "photo.heif"])(
+    "gives %s the file treatment, not a preview",
+    async (name) => {
+      const result = await readDroppedFiles([dropped(name, 10)]);
+      expect(result.attachments).toHaveLength(1);
+      expect(result.attachments[0]?.mimeType).toMatch(/^image\/hei[cf]$/);
+      expect(result.attachments[0]?.previewUri).toBeUndefined();
+    },
+  );
+
   it("checks the copied file's actual size before reading", async () => {
     state.info.mockReturnValue({ size: 20 * 1024 * 1024 });
     const result = await readDroppedFiles([dropped("one.png", 10), dropped("two.png", 10)]);

@@ -3,6 +3,7 @@ import {
   ATTACHMENT_IMAGE_QUALITY,
   ATTACHMENT_MAX_BYTES,
   ATTACHMENT_MAX_COUNT,
+  isAttachmentImageMimeType,
 } from "@rakazo/contracts";
 import { inferAttachmentMimeType, isStaticPng, PNG_ANIMATION_HEADER_BYTES } from "@rakazo/core";
 import * as DocumentPicker from "expo-document-picker";
@@ -334,9 +335,10 @@ export async function readDroppedFiles(
         skipped.push({ name, reason: attachmentSizeSkipReason(maxBytes) });
         continue;
       }
-      const previewUri = mimeType?.startsWith("image/")
-        ? `data:${mimeType};base64,${contentBase64}`
-        : undefined;
+      const previewUri =
+        mimeType && isAttachmentImageMimeType(mimeType)
+          ? `data:${mimeType};base64,${contentBase64}`
+          : undefined;
       attachments.push(pickedAttachment({ name, mimeType, size, contentBase64, previewUri }));
     }
   } finally {
@@ -371,9 +373,10 @@ export async function readSharedFiles(
         const mimeType = inferAttachmentMimeType(name, type || file.mimeType || undefined);
         const { contentBase64, size } = await readUriAsBase64(copy.uri, maxBytes);
         // The cache copy is removed after this read; previews must own their bytes.
-        const previewUri = mimeType?.startsWith("image/")
-          ? `data:${mimeType};base64,${contentBase64}`
-          : undefined;
+        const previewUri =
+          mimeType && isAttachmentImageMimeType(mimeType)
+            ? `data:${mimeType};base64,${contentBase64}`
+            : undefined;
         return filterPickedAttachments(
           existingCount + attachments.length,
           [{ name, mimeType, size, contentBase64, previewUri }],

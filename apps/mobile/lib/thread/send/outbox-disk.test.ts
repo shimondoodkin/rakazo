@@ -180,6 +180,26 @@ it("restores payload, uploaded ids and nonce for an idempotent retry", async () 
   expect(metadata).not.toContain("aGVsbG8=");
   expect(metadata).not.toContain("file:");
 });
+it.each(["image/heic", "image/heif"] as const)(
+  "gives %s no preview, saved or restored",
+  (mimeType) => {
+    const original = attempt();
+    original.payload.attachments[0]!.mimeType = mimeType;
+    expect(outboxDisk.admit(original)).toBe(true);
+    expect(original.payload.attachments[0]?.previewUri).toBeUndefined();
+    outboxDisk.save([original]);
+    const [restored] = outboxDisk.load(2, scope);
+    expect(restored?.payload.attachments[0]?.previewUri).toBeUndefined();
+  },
+);
+it("keeps the preview of a renderable image, saved and restored", () => {
+  const original = attempt();
+  expect(outboxDisk.admit(original)).toBe(true);
+  expect(original.payload.attachments[0]?.previewUri).toMatch(/outbox\/nonce-a\/0$/);
+  outboxDisk.save([original]);
+  const [restored] = outboxDisk.load(2, scope);
+  expect(restored?.payload.attachments[0]?.previewUri).toMatch(/outbox\/nonce-a\/0$/);
+});
 it.each([
   { userId: "user-b" },
   { apiBase: "https://other.example.test" },

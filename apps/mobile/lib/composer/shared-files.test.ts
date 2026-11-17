@@ -48,6 +48,18 @@ describe("shared files", () => {
     expect(result.attachments[0]?.previewUri).toBe("data:image/png;base64,YWJj");
     expect(result.sources).toEqual([files[1]?.uri, files[2]?.uri]);
   });
+  it.each([
+    ["photo.heic", "image/heic"],
+    ["photo.heif", "image/heif"],
+  ])("gives shared %s the file treatment, not a preview", async (name, type) => {
+    state.read.mockImplementationOnce((_uri, _maxBytes, read) =>
+      read({ uri: "file:///cache/copy" }, name, type),
+    );
+    const result = await readSharedFiles(files.slice(0, 1));
+    expect(result.attachments).toHaveLength(1);
+    expect(result.attachments[0]?.mimeType).toBe(type);
+    expect(result.attachments[0]?.previewUri).toBeUndefined();
+  });
   it("does not copy or read beyond the remaining attachment limit", async () => {
     const result = await readSharedFiles(files, 2);
     expect(result.attachments).toHaveLength(2);
