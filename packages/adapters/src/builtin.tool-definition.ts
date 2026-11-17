@@ -31,6 +31,7 @@ import { SCHEDULE_TIMING_FIELDS } from "./schedule-tools.js";
 import { SCRATCHPAD_NOTES_MAX_LENGTH, SCRATCHPAD_TITLE_MAX_LENGTH } from "./scratchpad-tools.js";
 import { messageUserMaxLength } from "./user-progress.js";
 import { MAX_WEB_FETCH_OFFSET } from "./web-limits.js";
+import { MAX_SPEAK_CHARS } from "./voice-http.js";
 
 // The owner flag can land in process.env after static imports run (loadRootEnv
 // parses .env once the entry module is already executing), so the model-facing
@@ -269,6 +270,17 @@ export const builtinAgentTools: ConnectorTool[] = [
         prompt: { type: "string", minLength: 1, maxLength: 4000 },
         jobId: { type: "string", minLength: 1, maxLength: 200 },
       },
+    },
+    readOnly: false,
+  },
+  {
+    name: "voice_message",
+    description:
+      "Speak text aloud in the person's chosen voice and attach the recording to chat, for when they ask for a voice message or to hear something. Uses their own voice provider and may incur charges. Write the text as it should be said, in the language they speak.",
+    inputSchema: {
+      type: "object",
+      properties: { text: { type: "string", minLength: 1, maxLength: MAX_SPEAK_CHARS } },
+      required: ["text"],
     },
     readOnly: false,
   },

@@ -112,6 +112,8 @@ export function selectBuiltinToolsForRun(options: {
   paymentWalletEnabled?: boolean;
   mediaImagesEnabled?: boolean;
   mediaVideoEnabled?: boolean;
+  /** The run's user chose a voice here, so their text can be spoken into a recording. */
+  voiceMessagesEnabled?: boolean;
   /** The deployment configured paid data services. */
   paidServicesEnabled?: boolean;
   messagingChannelRun: boolean;
@@ -172,6 +174,9 @@ export function selectBuiltinToolsForRun(options: {
       (options.paymentWalletEnabled || !PURCHASE_TOOL_NAMES.has(tool.name)) &&
       (options.mediaImagesEnabled || tool.name !== "generate_image") &&
       (options.mediaVideoEnabled || tool.name !== "generate_video") &&
+      // Speaking spends the person's own voice provider, so a shared channel's guests cannot.
+      ((options.voiceMessagesEnabled && !options.messagingChannelRun) ||
+        tool.name !== "voice_message") &&
       (options.paidServicesEnabled || !PAID_SERVICE_TOOL_NAMES.has(tool.name)) &&
       (options.ticketBoardEnabled ||
         (tool.name !== "board_tickets" && !tool.name.startsWith("ticket_"))) &&
@@ -183,6 +188,7 @@ export function selectBuiltinToolsForRun(options: {
           "message_agent",
           "generate_image",
           "generate_video",
+          "voice_message",
         ].includes(tool.name)) &&
       (options.voiceCall || tool.name !== "end_call") &&
       (emailMailbox || !EMAIL_INBOX_TOOL_NAMES.has(tool.name)) &&
